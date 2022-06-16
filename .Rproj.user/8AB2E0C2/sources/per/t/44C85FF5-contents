@@ -1,0 +1,1116 @@
+---
+title: "Percepção de Emoções"
+author: "Maurício Bueno"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+  word_document:
+    toc: yes
+editor_options:
+  chunk_output_type: console
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+# Carregar pacotes
+```{r}
+library(tidyverse)
+library(psych)
+library(GPArotation)
+library(pander)
+library(knitr)
+library(haven)
+#library(expss)
+library(janitor)
+#library(arsenal)
+#library(rstatix)
+```
+
+# Importar banco de dados
+```{r}
+df <- read_sav("2017-10-27 - Banco Atualizado - Fernanda (usar este).sav")
+
+names(df)
+view(df2)
+
+df1 <- df[complete.cases(df$PE),] # função para selecionar somente linhas completas
+
+df1 <- df1 %>% slice(-c(1:98)) #retirar sujeitos adolescentes coleta Fernanda Mestrado
+
+names(df2)
+
+df2 <- df1 %>% select(c(1:27,130:249)) #somente as respostas ao TPE
+glimpse(df2)
+
+names(df2)
+df2 <- df2 %>% select(-c(148:172))
+
+# Eliminar participantes com menos de 18 anos
+
+df2 <- df2 %>% filter(Idade >= 18)
+describe(df2$Idade) %>% kable()
+```
+
+# Pontuação por Consenso - Percepção de Emoções em Si
+```{r}
+df2$pesi1_1a <- ifelse(df2$pesi1_1 == 1,  df2 %>% count(pesi1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_1 ==1) %>% select(porc),
+                ifelse(df2$pesi1_1 == 2,  df2 %>% count(pesi1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_1 ==2) %>% select(porc),
+                ifelse(df2$pesi1_1 == 3,  df2 %>% count(pesi1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_1 ==3) %>% select(porc),
+                ifelse(df2$pesi1_1 == 4,  df2 %>% count(pesi1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_1 ==5) %>% select(porc))))) %>% as.numeric()
+df2$pesi1_2a <- ifelse(df2$pesi1_2 == 1,  df2 %>% count(pesi1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_2 ==1) %>% select(porc),
+                ifelse(df2$pesi1_2 == 2,  df2 %>% count(pesi1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_2 ==2) %>% select(porc),
+                ifelse(df2$pesi1_2 == 3,  df2 %>% count(pesi1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_2 ==3) %>% select(porc),
+                ifelse(df2$pesi1_2 == 4,  df2 %>% count(pesi1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_2 ==5) %>% select(porc)))))  %>% as.numeric()
+df2$pesi1_3a <- ifelse(df2$pesi1_3 == 1,  df2 %>% count(pesi1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_3 ==1) %>% select(porc),
+                ifelse(df2$pesi1_3 == 2,  df2 %>% count(pesi1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_3 ==2) %>% select(porc),
+                ifelse(df2$pesi1_3 == 3,  df2 %>% count(pesi1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_3 ==3) %>% select(porc),
+                ifelse(df2$pesi1_3 == 4,  df2 %>% count(pesi1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_3 ==5) %>% select(porc)))))  %>% as.numeric()
+df2$pesi1_4a <- ifelse(df2$pesi1_4 == 1,  df2 %>% count(pesi1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_4 ==1) %>% select(porc),
+                ifelse(df2$pesi1_4 == 2,  df2 %>% count(pesi1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_4 ==2) %>% select(porc),
+                ifelse(df2$pesi1_4 == 3,  df2 %>% count(pesi1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_4 ==3) %>% select(porc),
+                ifelse(df2$pesi1_4 == 4,  df2 %>% count(pesi1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi1_5a <- ifelse(df2$pesi1_5 == 1,  df2 %>% count(pesi1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_5 ==1) %>% select(porc),
+                ifelse(df2$pesi1_5 == 2,  df2 %>% count(pesi1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_5 ==2) %>% select(porc),
+                ifelse(df2$pesi1_5 == 3,  df2 %>% count(pesi1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_5 ==3) %>% select(porc),
+                ifelse(df2$pesi1_5 == 4,  df2 %>% count(pesi1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi1_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi2_1a <- ifelse(df2$pesi2_1 == 1,  df2 %>% count(pesi2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_1 ==1) %>% select(porc),
+                ifelse(df2$pesi2_1 == 2,  df2 %>% count(pesi2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_1 ==2) %>% select(porc),
+                ifelse(df2$pesi2_1 == 3,  df2 %>% count(pesi2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_1 ==3) %>% select(porc),
+                ifelse(df2$pesi2_1 == 4,  df2 %>% count(pesi2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi2_2a <- ifelse(df2$pesi2_2 == 1,  df2 %>% count(pesi2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_2 ==1) %>% select(porc),
+                ifelse(df2$pesi2_2 == 2,  df2 %>% count(pesi2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_2 ==2) %>% select(porc),
+                ifelse(df2$pesi2_2 == 3,  df2 %>% count(pesi2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_2 ==3) %>% select(porc),
+                ifelse(df2$pesi2_2 == 4,  df2 %>% count(pesi2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi2_3a <- ifelse(df2$pesi2_3 == 1,  df2 %>% count(pesi2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_3 ==1) %>% select(porc),
+                ifelse(df2$pesi2_3 == 2,  df2 %>% count(pesi2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_3 ==2) %>% select(porc),
+                ifelse(df2$pesi2_3 == 3,  df2 %>% count(pesi2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_3 ==3) %>% select(porc),
+                ifelse(df2$pesi2_3 == 4,  df2 %>% count(pesi2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi2_4a <- ifelse(df2$pesi2_4 == 1,  df2 %>% count(pesi2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_4 ==1) %>% select(porc),
+                ifelse(df2$pesi2_4 == 2,  df2 %>% count(pesi2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_4 ==2) %>% select(porc),
+                ifelse(df2$pesi2_4 == 3,  df2 %>% count(pesi2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_4 ==3) %>% select(porc),
+                ifelse(df2$pesi2_4 == 4,  df2 %>% count(pesi2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi2_5a <- ifelse(df2$pesi2_5 == 1,  df2 %>% count(pesi2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_5 ==1) %>% select(porc),
+                ifelse(df2$pesi2_5 == 2,  df2 %>% count(pesi2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_5 ==2) %>% select(porc),
+                ifelse(df2$pesi2_5 == 3,  df2 %>% count(pesi2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_5 ==3) %>% select(porc),
+                ifelse(df2$pesi2_5 == 4,  df2 %>% count(pesi2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi2_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi3_1a <- ifelse(df2$pesi3_1 == 1,  df2 %>% count(pesi3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_1 ==1) %>% select(porc),
+                ifelse(df2$pesi3_1 == 2,  df2 %>% count(pesi3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_1 ==2) %>% select(porc),
+                ifelse(df2$pesi3_1 == 3,  df2 %>% count(pesi3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_1 ==3) %>% select(porc),
+                ifelse(df2$pesi3_1 == 4,  df2 %>% count(pesi3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi3_2a <- ifelse(df2$pesi3_2 == 1,  df2 %>% count(pesi3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_2 ==1) %>% select(porc),
+                ifelse(df2$pesi3_2 == 2,  df2 %>% count(pesi3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_2 ==2) %>% select(porc),
+                ifelse(df2$pesi3_2 == 3,  df2 %>% count(pesi3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_2 ==3) %>% select(porc),
+                ifelse(df2$pesi3_2 == 4,  df2 %>% count(pesi3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi3_3a <- ifelse(df2$pesi3_3 == 1,  df2 %>% count(pesi3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_3 ==1) %>% select(porc),
+                ifelse(df2$pesi3_3 == 2,  df2 %>% count(pesi3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_3 ==2) %>% select(porc),
+                ifelse(df2$pesi3_3 == 3,  df2 %>% count(pesi3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_3 ==3) %>% select(porc),
+                ifelse(df2$pesi3_3 == 4,  df2 %>% count(pesi3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi3_4a <- ifelse(df2$pesi3_4 == 1,  df2 %>% count(pesi3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_4 ==1) %>% select(porc),
+                ifelse(df2$pesi3_4 == 2,  df2 %>% count(pesi3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_4 ==2) %>% select(porc),
+                ifelse(df2$pesi3_4 == 3,  df2 %>% count(pesi3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_4 ==3) %>% select(porc),
+                ifelse(df2$pesi3_4 == 4,  df2 %>% count(pesi3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi3_5a <- ifelse(df2$pesi3_5 == 1,  df2 %>% count(pesi3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_5 ==1) %>% select(porc),
+                ifelse(df2$pesi3_5 == 2,  df2 %>% count(pesi3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_5 ==2) %>% select(porc),
+                ifelse(df2$pesi3_5 == 3,  df2 %>% count(pesi3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_5 ==3) %>% select(porc),
+                ifelse(df2$pesi3_5 == 4,  df2 %>% count(pesi3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi3_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi4_1a <- ifelse(df2$pesi4_1 == 1,  df2 %>% count(pesi4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_1 ==1) %>% select(porc),
+                ifelse(df2$pesi4_1 == 2,  df2 %>% count(pesi4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_1 ==2) %>% select(porc),
+                ifelse(df2$pesi4_1 == 3,  df2 %>% count(pesi4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_1 ==3) %>% select(porc),
+                ifelse(df2$pesi4_1 == 4,  df2 %>% count(pesi4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi4_2a <- ifelse(df2$pesi4_2 == 1,  df2 %>% count(pesi4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_2 ==1) %>% select(porc),
+                ifelse(df2$pesi4_2 == 2,  df2 %>% count(pesi4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_2 ==2) %>% select(porc),
+                ifelse(df2$pesi4_2 == 3,  df2 %>% count(pesi4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_2 ==3) %>% select(porc),
+                ifelse(df2$pesi4_2 == 4,  df2 %>% count(pesi4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi4_3a <- ifelse(df2$pesi4_3 == 1,  df2 %>% count(pesi4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_3 ==1) %>% select(porc),
+                ifelse(df2$pesi4_3 == 2,  df2 %>% count(pesi4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_3 ==2) %>% select(porc),
+                ifelse(df2$pesi4_3 == 3,  df2 %>% count(pesi4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_3 ==3) %>% select(porc),
+                ifelse(df2$pesi4_3 == 4,  df2 %>% count(pesi4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_3 ==5) %>% select(porc)))))  %>% as.numeric() 
+df2$pesi4_4a <- ifelse(df2$pesi4_4 == 1,  df2 %>% count(pesi4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_4 ==1) %>% select(porc),
+                ifelse(df2$pesi4_4 == 2,  df2 %>% count(pesi4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_4 ==2) %>% select(porc),
+                ifelse(df2$pesi4_4 == 3,  df2 %>% count(pesi4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_4 ==3) %>% select(porc),
+                ifelse(df2$pesi4_4 == 4,  df2 %>% count(pesi4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi4_5a <- ifelse(df2$pesi4_5 == 1,  df2 %>% count(pesi4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_5 ==1) %>% select(porc),
+                ifelse(df2$pesi4_5 == 2,  df2 %>% count(pesi4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_5 ==2) %>% select(porc),
+                ifelse(df2$pesi4_5 == 3,  df2 %>% count(pesi4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_5 ==3) %>% select(porc),
+                ifelse(df2$pesi4_5 == 4,  df2 %>% count(pesi4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi4_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi5_1a <- ifelse(df2$pesi5_1 == 1,  df2 %>% count(pesi5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_1 ==1) %>% select(porc),
+                ifelse(df2$pesi5_1 == 2,  df2 %>% count(pesi5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_1 ==2) %>% select(porc),
+                ifelse(df2$pesi5_1 == 3,  df2 %>% count(pesi5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_1 ==3) %>% select(porc),
+                ifelse(df2$pesi5_1 == 4,  df2 %>% count(pesi5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi5_2a <- ifelse(df2$pesi5_2 == 1,  df2 %>% count(pesi5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_2 ==1) %>% select(porc),
+                ifelse(df2$pesi5_2 == 2,  df2 %>% count(pesi5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_2 ==2) %>% select(porc),
+                ifelse(df2$pesi5_2 == 3,  df2 %>% count(pesi5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_2 ==3) %>% select(porc),
+                ifelse(df2$pesi5_2 == 4,  df2 %>% count(pesi5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi5_3a <- ifelse(df2$pesi5_3 == 1,  df2 %>% count(pesi5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_3 ==1) %>% select(porc),
+                ifelse(df2$pesi5_3 == 2,  df2 %>% count(pesi5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_3 ==2) %>% select(porc),
+                ifelse(df2$pesi5_3 == 3,  df2 %>% count(pesi5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_3 ==3) %>% select(porc),
+                ifelse(df2$pesi5_3 == 4,  df2 %>% count(pesi5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi5_4a <- ifelse(df2$pesi5_4 == 1,  df2 %>% count(pesi5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_4 ==1) %>% select(porc),
+                ifelse(df2$pesi5_4 == 2,  df2 %>% count(pesi5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_4 ==2) %>% select(porc),
+                ifelse(df2$pesi5_4 == 3,  df2 %>% count(pesi5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_4 ==3) %>% select(porc),
+                ifelse(df2$pesi5_4 == 4,  df2 %>% count(pesi5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi5_5a <- ifelse(df2$pesi5_5 == 1,  df2 %>% count(pesi5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_5 ==1) %>% select(porc),
+                ifelse(df2$pesi5_5 == 2,  df2 %>% count(pesi5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_5 ==2) %>% select(porc),
+                ifelse(df2$pesi5_5 == 3,  df2 %>% count(pesi5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_5 ==3) %>% select(porc),
+                ifelse(df2$pesi5_5 == 4,  df2 %>% count(pesi5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi5_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi6_1a <- ifelse(df2$pesi6_1 == 1,  df2 %>% count(pesi6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_1 ==1) %>% select(porc),
+                ifelse(df2$pesi6_1 == 2,  df2 %>% count(pesi6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_1 ==2) %>% select(porc),
+                ifelse(df2$pesi6_1 == 3,  df2 %>% count(pesi6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_1 ==3) %>% select(porc),
+                ifelse(df2$pesi6_1 == 4,  df2 %>% count(pesi6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi6_2a <- ifelse(df2$pesi6_2 == 1,  df2 %>% count(pesi6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_2 ==1) %>% select(porc),
+                ifelse(df2$pesi6_2 == 2,  df2 %>% count(pesi6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_2 ==2) %>% select(porc),
+                ifelse(df2$pesi6_2 == 3,  df2 %>% count(pesi6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_2 ==3) %>% select(porc),
+                ifelse(df2$pesi6_2 == 4,  df2 %>% count(pesi6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi6_3a <- ifelse(df2$pesi6_3 == 1,  df2 %>% count(pesi6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_3 ==1) %>% select(porc),
+                ifelse(df2$pesi6_3 == 2,  df2 %>% count(pesi6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_3 ==2) %>% select(porc),
+                ifelse(df2$pesi6_3 == 3,  df2 %>% count(pesi6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_3 ==3) %>% select(porc),
+                ifelse(df2$pesi6_3 == 4,  df2 %>% count(pesi6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi6_4a <- ifelse(df2$pesi6_4 == 1,  df2 %>% count(pesi6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_4 ==1) %>% select(porc),
+                ifelse(df2$pesi6_4 == 2,  df2 %>% count(pesi6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_4 ==2) %>% select(porc),
+                ifelse(df2$pesi6_4 == 3,  df2 %>% count(pesi6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_4 ==3) %>% select(porc),
+                ifelse(df2$pesi6_4 == 4,  df2 %>% count(pesi6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi6_5a <- ifelse(df2$pesi6_5 == 1,  df2 %>% count(pesi6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_5 ==1) %>% select(porc),
+                ifelse(df2$pesi6_5 == 2,  df2 %>% count(pesi6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_5 ==2) %>% select(porc),
+                ifelse(df2$pesi6_5 == 3,  df2 %>% count(pesi6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_5 ==3) %>% select(porc),
+                ifelse(df2$pesi6_5 == 4,  df2 %>% count(pesi6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi6_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi7_1a <- ifelse(df2$pesi7_1 == 1,  df2 %>% count(pesi7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_1 ==1) %>% select(porc),
+                ifelse(df2$pesi7_1 == 2,  df2 %>% count(pesi7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_1 ==2) %>% select(porc),
+                ifelse(df2$pesi7_1 == 3,  df2 %>% count(pesi7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_1 ==3) %>% select(porc),
+                ifelse(df2$pesi7_1 == 4,  df2 %>% count(pesi7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi7_2a <- ifelse(df2$pesi7_2 == 1,  df2 %>% count(pesi7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_2 ==1) %>% select(porc),
+                ifelse(df2$pesi7_2 == 2,  df2 %>% count(pesi7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_2 ==2) %>% select(porc),
+                ifelse(df2$pesi7_2 == 3,  df2 %>% count(pesi7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_2 ==3) %>% select(porc),
+                ifelse(df2$pesi7_2 == 4,  df2 %>% count(pesi7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi7_3a <- ifelse(df2$pesi7_3 == 1,  df2 %>% count(pesi7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_3 ==1) %>% select(porc),
+                ifelse(df2$pesi7_3 == 2,  df2 %>% count(pesi7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_3 ==2) %>% select(porc),
+                ifelse(df2$pesi7_3 == 3,  df2 %>% count(pesi7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_3 ==3) %>% select(porc),
+                ifelse(df2$pesi7_3 == 4,  df2 %>% count(pesi7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi7_4a <- ifelse(df2$pesi7_4 == 1,  df2 %>% count(pesi7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_4 ==1) %>% select(porc),
+                ifelse(df2$pesi7_4 == 2,  df2 %>% count(pesi7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_4 ==2) %>% select(porc),
+                ifelse(df2$pesi7_4 == 3,  df2 %>% count(pesi7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_4 ==3) %>% select(porc),
+                ifelse(df2$pesi7_4 == 4,  df2 %>% count(pesi7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi7_5a <- ifelse(df2$pesi7_5 == 1,  df2 %>% count(pesi7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_5 ==1) %>% select(porc),
+                ifelse(df2$pesi7_5 == 2,  df2 %>% count(pesi7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_5 ==2) %>% select(porc),
+                ifelse(df2$pesi7_5 == 3,  df2 %>% count(pesi7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_5 ==3) %>% select(porc),
+                ifelse(df2$pesi7_5 == 4,  df2 %>% count(pesi7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi7_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi8_1a <- ifelse(df2$pesi8_1 == 1,  df2 %>% count(pesi8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_1 ==1) %>% select(porc),
+                ifelse(df2$pesi8_1 == 2,  df2 %>% count(pesi8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_1 ==2) %>% select(porc),
+                ifelse(df2$pesi8_1 == 3,  df2 %>% count(pesi8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_1 ==3) %>% select(porc),
+                ifelse(df2$pesi8_1 == 4,  df2 %>% count(pesi8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi8_2a <- ifelse(df2$pesi8_2 == 1,  df2 %>% count(pesi8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_2 ==1) %>% select(porc),
+                ifelse(df2$pesi8_2 == 2,  df2 %>% count(pesi8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_2 ==2) %>% select(porc),
+                ifelse(df2$pesi8_2 == 3,  df2 %>% count(pesi8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_2 ==3) %>% select(porc),
+                ifelse(df2$pesi8_2 == 4,  df2 %>% count(pesi8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi8_3a <- ifelse(df2$pesi8_3 == 1,  df2 %>% count(pesi8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_3 ==1) %>% select(porc),
+                ifelse(df2$pesi8_3 == 2,  df2 %>% count(pesi8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_3 ==2) %>% select(porc),
+                ifelse(df2$pesi8_3 == 3,  df2 %>% count(pesi8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_3 ==3) %>% select(porc),
+                ifelse(df2$pesi8_3 == 4,  df2 %>% count(pesi8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_3 ==5) %>% select(porc)))))  %>% as.numeric()
+df2$pesi8_4a <- ifelse(df2$pesi8_4 == 1,  df2 %>% count(pesi8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_4 ==1) %>% select(porc),
+                ifelse(df2$pesi8_4 == 2,  df2 %>% count(pesi8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_4 ==2) %>% select(porc),
+                ifelse(df2$pesi8_4 == 3,  df2 %>% count(pesi8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_4 ==3) %>% select(porc),
+                ifelse(df2$pesi8_4 == 4,  df2 %>% count(pesi8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi8_5a <- ifelse(df2$pesi8_5 == 1,  df2 %>% count(pesi8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_5 ==1) %>% select(porc),
+                ifelse(df2$pesi8_5 == 2,  df2 %>% count(pesi8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_5 ==2) %>% select(porc),
+                ifelse(df2$pesi8_5 == 3,  df2 %>% count(pesi8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_5 ==3) %>% select(porc),
+                ifelse(df2$pesi8_5 == 4,  df2 %>% count(pesi8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi8_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi9_1a <- ifelse(df2$pesi9_1 == 1,  df2 %>% count(pesi9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_1 ==1) %>% select(porc),
+                ifelse(df2$pesi9_1 == 2,  df2 %>% count(pesi9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_1 ==2) %>% select(porc),
+                ifelse(df2$pesi9_1 == 3,  df2 %>% count(pesi9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_1 ==3) %>% select(porc),
+                ifelse(df2$pesi9_1 == 4,  df2 %>% count(pesi9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_1 ==4) %>% select(porc),
+                                          df2 %>% count(pesi9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi9_2a <- ifelse(df2$pesi9_2 == 1,  df2 %>% count(pesi9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_2 ==1) %>% select(porc),
+                ifelse(df2$pesi9_2 == 2,  df2 %>% count(pesi9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_2 ==2) %>% select(porc),
+                ifelse(df2$pesi9_2 == 3,  df2 %>% count(pesi9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_2 ==3) %>% select(porc),
+                ifelse(df2$pesi9_2 == 4,  df2 %>% count(pesi9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_2 ==4) %>% select(porc),
+                                          df2 %>% count(pesi9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi9_3a <- ifelse(df2$pesi9_3 == 1,  df2 %>% count(pesi9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_3 ==1) %>% select(porc),
+                ifelse(df2$pesi9_3 == 2,  df2 %>% count(pesi9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_3 ==2) %>% select(porc),
+                ifelse(df2$pesi9_3 == 3,  df2 %>% count(pesi9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_3 ==3) %>% select(porc),
+                ifelse(df2$pesi9_3 == 4,  df2 %>% count(pesi9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_3 ==4) %>% select(porc),
+                                          df2 %>% count(pesi9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_3 ==5) %>% select(porc)))))  %>% as.numeric()
+df2$pesi9_4a <- ifelse(df2$pesi9_4 == 1,  df2 %>% count(pesi9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_4 ==1) %>% select(porc),
+                ifelse(df2$pesi9_4 == 2,  df2 %>% count(pesi9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_4 ==2) %>% select(porc),
+                ifelse(df2$pesi9_4 == 3,  df2 %>% count(pesi9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_4 ==3) %>% select(porc),
+                ifelse(df2$pesi9_4 == 4,  df2 %>% count(pesi9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_4 ==4) %>% select(porc),
+                                          df2 %>% count(pesi9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi9_5a <- ifelse(df2$pesi9_5 == 1,  df2 %>% count(pesi9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_5 ==1) %>% select(porc),
+                ifelse(df2$pesi9_5 == 2,  df2 %>% count(pesi9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_5 ==2) %>% select(porc),
+                ifelse(df2$pesi9_5 == 3,  df2 %>% count(pesi9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_5 ==3) %>% select(porc),
+                ifelse(df2$pesi9_5 == 4,  df2 %>% count(pesi9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_5 ==4) %>% select(porc),
+                                          df2 %>% count(pesi9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi9_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi10_1a<- ifelse(df2$pesi10_1 == 1, df2 %>% count(pesi10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_1==1) %>% select(porc),
+                ifelse(df2$pesi10_1 == 2, df2 %>% count(pesi10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_1==2) %>% select(porc),
+                ifelse(df2$pesi10_1 == 3, df2 %>% count(pesi10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_1==3) %>% select(porc),
+                ifelse(df2$pesi10_1 == 4, df2 %>% count(pesi10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_1==4) %>% select(porc),
+                                          df2 %>% count(pesi10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_1==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi10_2a<- ifelse(df2$pesi10_2 == 1, df2 %>% count(pesi10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_2==1) %>% select(porc),
+                ifelse(df2$pesi10_2 == 2, df2 %>% count(pesi10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_2==2) %>% select(porc),
+                ifelse(df2$pesi10_2 == 3, df2 %>% count(pesi10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_2==3) %>% select(porc),
+                ifelse(df2$pesi10_2 == 4, df2 %>% count(pesi10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_2==4) %>% select(porc),
+                                          df2 %>% count(pesi10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_2==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi10_3a<- ifelse(df2$pesi10_3 == 1, df2 %>% count(pesi10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_3==1) %>% select(porc),
+                ifelse(df2$pesi10_3 == 2, df2 %>% count(pesi10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_3==2) %>% select(porc),
+                ifelse(df2$pesi10_3 == 3, df2 %>% count(pesi10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_3==3) %>% select(porc),
+                ifelse(df2$pesi10_3 == 4, df2 %>% count(pesi10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_3==4) %>% select(porc),
+                                          df2 %>% count(pesi10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_3==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi10_4a<- ifelse(df2$pesi10_4 == 1, df2 %>% count(pesi10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_4==1) %>% select(porc),
+                ifelse(df2$pesi10_4 == 2, df2 %>% count(pesi10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_4==2) %>% select(porc),
+                ifelse(df2$pesi10_4 == 3, df2 %>% count(pesi10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_4==3) %>% select(porc),
+                ifelse(df2$pesi10_4 == 4, df2 %>% count(pesi10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_4==4) %>% select(porc),
+                                          df2 %>% count(pesi10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_4==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi10_5a<- ifelse(df2$pesi10_5 == 1, df2 %>% count(pesi10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_5==1) %>% select(porc),
+                ifelse(df2$pesi10_5 == 2, df2 %>% count(pesi10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_5==2) %>% select(porc),
+                ifelse(df2$pesi10_5 == 3, df2 %>% count(pesi10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_5==3) %>% select(porc),
+                ifelse(df2$pesi10_5 == 4, df2 %>% count(pesi10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_5==4) %>% select(porc),
+                                          df2 %>% count(pesi10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi10_5==5) %>% select(porc)))))  %>% as.numeric()
+df2$pesi11_1a<- ifelse(df2$pesi11_1 == 1, df2 %>% count(pesi11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_1==1) %>% select(porc),
+                ifelse(df2$pesi11_1 == 2, df2 %>% count(pesi11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_1==2) %>% select(porc),
+                ifelse(df2$pesi11_1 == 3, df2 %>% count(pesi11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_1==3) %>% select(porc),
+                ifelse(df2$pesi11_1 == 4, df2 %>% count(pesi11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_1==4) %>% select(porc),
+                                          df2 %>% count(pesi11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_1==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi11_2a<- ifelse(df2$pesi11_2 == 1, df2 %>% count(pesi11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_2==1) %>% select(porc),
+                ifelse(df2$pesi11_2 == 2, df2 %>% count(pesi11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_2==2) %>% select(porc),
+                ifelse(df2$pesi11_2 == 3, df2 %>% count(pesi11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_2==3) %>% select(porc),
+                ifelse(df2$pesi11_2 == 4, df2 %>% count(pesi11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_2==4) %>% select(porc),
+                                          df2 %>% count(pesi11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_2==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi11_3a<- ifelse(df2$pesi11_3 == 1, df2 %>% count(pesi11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_3==1) %>% select(porc),
+                ifelse(df2$pesi11_3 == 2, df2 %>% count(pesi11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_3==2) %>% select(porc),
+                ifelse(df2$pesi11_3 == 3, df2 %>% count(pesi11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_3==3) %>% select(porc),
+                ifelse(df2$pesi11_3 == 4, df2 %>% count(pesi11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_3==4) %>% select(porc),
+                                          df2 %>% count(pesi11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_3==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi11_4a<- ifelse(df2$pesi11_4 == 1, df2 %>% count(pesi11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_4==1) %>% select(porc),
+                ifelse(df2$pesi11_4 == 2, df2 %>% count(pesi11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_4==2) %>% select(porc),
+                ifelse(df2$pesi11_4 == 3, df2 %>% count(pesi11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_4==3) %>% select(porc),
+                ifelse(df2$pesi11_4 == 4, df2 %>% count(pesi11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_4==4) %>% select(porc),
+                                          df2 %>% count(pesi11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_4==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi11_5a<- ifelse(df2$pesi11_5 == 1, df2 %>% count(pesi11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_5==1) %>% select(porc),
+                ifelse(df2$pesi11_5 == 2, df2 %>% count(pesi11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_5==2) %>% select(porc),
+                ifelse(df2$pesi11_5 == 3, df2 %>% count(pesi11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_5==3) %>% select(porc),
+                ifelse(df2$pesi11_5 == 4, df2 %>% count(pesi11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_5==4) %>% select(porc),
+                                          df2 %>% count(pesi11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi11_5==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi12_1a<- ifelse(df2$pesi12_1 == 1, df2 %>% count(pesi12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_1==1) %>% select(porc),
+                ifelse(df2$pesi12_1 == 2, df2 %>% count(pesi12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_1==2) %>% select(porc),
+                ifelse(df2$pesi12_1 == 3, df2 %>% count(pesi12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_1==3) %>% select(porc),
+                ifelse(df2$pesi12_1 == 4, df2 %>% count(pesi12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_1==4) %>% select(porc),
+                                          df2 %>% count(pesi12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_1==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi12_2a<- ifelse(df2$pesi12_2 == 1, df2 %>% count(pesi12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_2==1) %>% select(porc),
+                ifelse(df2$pesi12_2 == 2, df2 %>% count(pesi12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_2==2) %>% select(porc),
+                ifelse(df2$pesi12_2 == 3, df2 %>% count(pesi12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_2==3) %>% select(porc),
+                ifelse(df2$pesi12_2 == 4, df2 %>% count(pesi12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_2==4) %>% select(porc),
+                                          df2 %>% count(pesi12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_2==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi12_3a<- ifelse(df2$pesi12_3 == 1, df2 %>% count(pesi12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_3==1) %>% select(porc),
+                ifelse(df2$pesi12_3 == 2, df2 %>% count(pesi12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_3==2) %>% select(porc),
+                ifelse(df2$pesi12_3 == 3, df2 %>% count(pesi12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_3==3) %>% select(porc),
+                ifelse(df2$pesi12_3 == 4, df2 %>% count(pesi12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_3==4) %>% select(porc),
+                                          df2 %>% count(pesi12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_3==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi12_4a<- ifelse(df2$pesi12_4 == 1, df2 %>% count(pesi12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_4==1) %>% select(porc),
+                ifelse(df2$pesi12_4 == 2, df2 %>% count(pesi12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_4==2) %>% select(porc),
+                ifelse(df2$pesi12_4 == 3, df2 %>% count(pesi12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_4==3) %>% select(porc),
+                ifelse(df2$pesi12_4 == 4, df2 %>% count(pesi12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_4==4) %>% select(porc),
+                                          df2 %>% count(pesi12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_4==5) %>% select(porc)))))   %>% as.numeric()
+df2$pesi12_5a<- ifelse(df2$pesi12_5 == 1, df2 %>% count(pesi12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_5==1) %>% select(porc),
+                ifelse(df2$pesi12_5 == 2, df2 %>% count(pesi12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_5==2) %>% select(porc),
+                ifelse(df2$pesi12_5 == 3, df2 %>% count(pesi12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_5==3) %>% select(porc),
+                ifelse(df2$pesi12_5 == 4, df2 %>% count(pesi12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_5==4) %>% select(porc),
+                                          df2 %>% count(pesi12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(pesi12_5==5) %>% select(porc))))) %>% as.numeric()
+
+names(df2)
+```
+
+# Pontuações por Consenso - Percepção de Emoções em Outros
+```{r}
+
+df2$peou1_1a <- ifelse(df2$peou1_1 == 1,  df2 %>% count(peou1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_1 ==1) %>% select(porc),
+                ifelse(df2$peou1_1 == 2,  df2 %>% count(peou1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_1 ==2) %>% select(porc),
+                ifelse(df2$peou1_1 == 3,  df2 %>% count(peou1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_1 ==3) %>% select(porc),
+                ifelse(df2$peou1_1 == 4,  df2 %>% count(peou1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou1_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_1 ==5) %>% select(porc))))) %>% as.numeric()
+df2$peou1_2a <- ifelse(df2$peou1_2 == 1,  df2 %>% count(peou1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_2 ==1) %>% select(porc),
+                ifelse(df2$peou1_2 == 2,  df2 %>% count(peou1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_2 ==2) %>% select(porc),
+                ifelse(df2$peou1_2 == 3,  df2 %>% count(peou1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_2 ==3) %>% select(porc),
+                ifelse(df2$peou1_2 == 4,  df2 %>% count(peou1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou1_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_2 ==5) %>% select(porc)))))  %>% as.numeric()
+df2$peou1_3a <- ifelse(df2$peou1_3 == 1,  df2 %>% count(peou1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_3 ==1) %>% select(porc),
+                ifelse(df2$peou1_3 == 2,  df2 %>% count(peou1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_3 ==2) %>% select(porc),
+                ifelse(df2$peou1_3 == 3,  df2 %>% count(peou1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_3 ==3) %>% select(porc),
+                ifelse(df2$peou1_3 == 4,  df2 %>% count(peou1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou1_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_3 ==5) %>% select(porc)))))  %>% as.numeric()
+df2$peou1_4a <- ifelse(df2$peou1_4 == 1,  df2 %>% count(peou1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_4 ==1) %>% select(porc),
+                ifelse(df2$peou1_4 == 2,  df2 %>% count(peou1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_4 ==2) %>% select(porc),
+                ifelse(df2$peou1_4 == 3,  df2 %>% count(peou1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_4 ==3) %>% select(porc),
+                ifelse(df2$peou1_4 == 4,  df2 %>% count(peou1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou1_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou1_5a <- ifelse(df2$peou1_5 == 1,  df2 %>% count(peou1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_5 ==1) %>% select(porc),
+                ifelse(df2$peou1_5 == 2,  df2 %>% count(peou1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_5 ==2) %>% select(porc),
+                ifelse(df2$peou1_5 == 3,  df2 %>% count(peou1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_5 ==3) %>% select(porc),
+                ifelse(df2$peou1_5 == 4,  df2 %>% count(peou1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou1_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou1_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou2_1a <- ifelse(df2$peou2_1 == 1,  df2 %>% count(peou2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_1 ==1) %>% select(porc),
+                ifelse(df2$peou2_1 == 2,  df2 %>% count(peou2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_1 ==2) %>% select(porc),
+                ifelse(df2$peou2_1 == 3,  df2 %>% count(peou2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_1 ==3) %>% select(porc),
+                ifelse(df2$peou2_1 == 4,  df2 %>% count(peou2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou2_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou2_2a <- ifelse(df2$peou2_2 == 1,  df2 %>% count(peou2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_2 ==1) %>% select(porc),
+                ifelse(df2$peou2_2 == 2,  df2 %>% count(peou2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_2 ==2) %>% select(porc),
+                ifelse(df2$peou2_2 == 3,  df2 %>% count(peou2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_2 ==3) %>% select(porc),
+                ifelse(df2$peou2_2 == 4,  df2 %>% count(peou2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou2_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou2_3a <- ifelse(df2$peou2_3 == 1,  df2 %>% count(peou2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_3 ==1) %>% select(porc),
+                ifelse(df2$peou2_3 == 2,  df2 %>% count(peou2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_3 ==2) %>% select(porc),
+                ifelse(df2$peou2_3 == 3,  df2 %>% count(peou2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_3 ==3) %>% select(porc),
+                ifelse(df2$peou2_3 == 4,  df2 %>% count(peou2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou2_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou2_4a <- ifelse(df2$peou2_4 == 1,  df2 %>% count(peou2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_4 ==1) %>% select(porc),
+                ifelse(df2$peou2_4 == 2,  df2 %>% count(peou2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_4 ==2) %>% select(porc),
+                ifelse(df2$peou2_4 == 3,  df2 %>% count(peou2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_4 ==3) %>% select(porc),
+                ifelse(df2$peou2_4 == 4,  df2 %>% count(peou2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou2_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou2_5a <- ifelse(df2$peou2_5 == 1,  df2 %>% count(peou2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_5 ==1) %>% select(porc),
+                ifelse(df2$peou2_5 == 2,  df2 %>% count(peou2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_5 ==2) %>% select(porc),
+                ifelse(df2$peou2_5 == 3,  df2 %>% count(peou2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_5 ==3) %>% select(porc),
+                ifelse(df2$peou2_5 == 4,  df2 %>% count(peou2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou2_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou2_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou3_1a <- ifelse(df2$peou3_1 == 1,  df2 %>% count(peou3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_1 ==1) %>% select(porc),
+                ifelse(df2$peou3_1 == 2,  df2 %>% count(peou3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_1 ==2) %>% select(porc),
+                ifelse(df2$peou3_1 == 3,  df2 %>% count(peou3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_1 ==3) %>% select(porc),
+                ifelse(df2$peou3_1 == 4,  df2 %>% count(peou3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou3_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou3_2a <- ifelse(df2$peou3_2 == 1,  df2 %>% count(peou3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_2 ==1) %>% select(porc),
+                ifelse(df2$peou3_2 == 2,  df2 %>% count(peou3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_2 ==2) %>% select(porc),
+                ifelse(df2$peou3_2 == 3,  df2 %>% count(peou3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_2 ==3) %>% select(porc),
+                ifelse(df2$peou3_2 == 4,  df2 %>% count(peou3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou3_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou3_3a <- ifelse(df2$peou3_3 == 1,  df2 %>% count(peou3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_3 ==1) %>% select(porc),
+                ifelse(df2$peou3_3 == 2,  df2 %>% count(peou3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_3 ==2) %>% select(porc),
+                ifelse(df2$peou3_3 == 3,  df2 %>% count(peou3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_3 ==3) %>% select(porc),
+                ifelse(df2$peou3_3 == 4,  df2 %>% count(peou3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou3_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou3_4a <- ifelse(df2$peou3_4 == 1,  df2 %>% count(peou3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_4 ==1) %>% select(porc),
+                ifelse(df2$peou3_4 == 2,  df2 %>% count(peou3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_4 ==2) %>% select(porc),
+                ifelse(df2$peou3_4 == 3,  df2 %>% count(peou3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_4 ==3) %>% select(porc),
+                ifelse(df2$peou3_4 == 4,  df2 %>% count(peou3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou3_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou3_5a <- ifelse(df2$peou3_5 == 1,  df2 %>% count(peou3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_5 ==1) %>% select(porc),
+                ifelse(df2$peou3_5 == 2,  df2 %>% count(peou3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_5 ==2) %>% select(porc),
+                ifelse(df2$peou3_5 == 3,  df2 %>% count(peou3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_5 ==3) %>% select(porc),
+                ifelse(df2$peou3_5 == 4,  df2 %>% count(peou3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou3_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou3_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou4_1a <- ifelse(df2$peou4_1 == 1,  df2 %>% count(peou4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_1 ==1) %>% select(porc),
+                ifelse(df2$peou4_1 == 2,  df2 %>% count(peou4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_1 ==2) %>% select(porc),
+                ifelse(df2$peou4_1 == 3,  df2 %>% count(peou4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_1 ==3) %>% select(porc),
+                ifelse(df2$peou4_1 == 4,  df2 %>% count(peou4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou4_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou4_2a <- ifelse(df2$peou4_2 == 1,  df2 %>% count(peou4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_2 ==1) %>% select(porc),
+                ifelse(df2$peou4_2 == 2,  df2 %>% count(peou4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_2 ==2) %>% select(porc),
+                ifelse(df2$peou4_2 == 3,  df2 %>% count(peou4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_2 ==3) %>% select(porc),
+                ifelse(df2$peou4_2 == 4,  df2 %>% count(peou4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou4_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou4_3a <- ifelse(df2$peou4_3 == 1,  df2 %>% count(peou4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_3 ==1) %>% select(porc),
+                ifelse(df2$peou4_3 == 2,  df2 %>% count(peou4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_3 ==2) %>% select(porc),
+                ifelse(df2$peou4_3 == 3,  df2 %>% count(peou4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_3 ==3) %>% select(porc),
+                ifelse(df2$peou4_3 == 4,  df2 %>% count(peou4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou4_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_3 ==5) %>% select(porc)))))  %>% as.numeric() 
+df2$peou4_4a <- ifelse(df2$peou4_4 == 1,  df2 %>% count(peou4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_4 ==1) %>% select(porc),
+                ifelse(df2$peou4_4 == 2,  df2 %>% count(peou4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_4 ==2) %>% select(porc),
+                ifelse(df2$peou4_4 == 3,  df2 %>% count(peou4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_4 ==3) %>% select(porc),
+                ifelse(df2$peou4_4 == 4,  df2 %>% count(peou4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou4_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou4_5a <- ifelse(df2$peou4_5 == 1,  df2 %>% count(peou4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_5 ==1) %>% select(porc),
+                ifelse(df2$peou4_5 == 2,  df2 %>% count(peou4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_5 ==2) %>% select(porc),
+                ifelse(df2$peou4_5 == 3,  df2 %>% count(peou4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_5 ==3) %>% select(porc),
+                ifelse(df2$peou4_5 == 4,  df2 %>% count(peou4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou4_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou4_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou5_1a <- ifelse(df2$peou5_1 == 1,  df2 %>% count(peou5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_1 ==1) %>% select(porc),
+                ifelse(df2$peou5_1 == 2,  df2 %>% count(peou5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_1 ==2) %>% select(porc),
+                ifelse(df2$peou5_1 == 3,  df2 %>% count(peou5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_1 ==3) %>% select(porc),
+                ifelse(df2$peou5_1 == 4,  df2 %>% count(peou5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou5_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou5_2a <- ifelse(df2$peou5_2 == 1,  df2 %>% count(peou5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_2 ==1) %>% select(porc),
+                ifelse(df2$peou5_2 == 2,  df2 %>% count(peou5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_2 ==2) %>% select(porc),
+                ifelse(df2$peou5_2 == 3,  df2 %>% count(peou5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_2 ==3) %>% select(porc),
+                ifelse(df2$peou5_2 == 4,  df2 %>% count(peou5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou5_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou5_3a <- ifelse(df2$peou5_3 == 1,  df2 %>% count(peou5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_3 ==1) %>% select(porc),
+                ifelse(df2$peou5_3 == 2,  df2 %>% count(peou5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_3 ==2) %>% select(porc),
+                ifelse(df2$peou5_3 == 3,  df2 %>% count(peou5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_3 ==3) %>% select(porc),
+                ifelse(df2$peou5_3 == 4,  df2 %>% count(peou5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou5_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou5_4a <- ifelse(df2$peou5_4 == 1,  df2 %>% count(peou5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_4 ==1) %>% select(porc),
+                ifelse(df2$peou5_4 == 2,  df2 %>% count(peou5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_4 ==2) %>% select(porc),
+                ifelse(df2$peou5_4 == 3,  df2 %>% count(peou5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_4 ==3) %>% select(porc),
+                ifelse(df2$peou5_4 == 4,  df2 %>% count(peou5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou5_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou5_5a <- ifelse(df2$peou5_5 == 1,  df2 %>% count(peou5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_5 ==1) %>% select(porc),
+                ifelse(df2$peou5_5 == 2,  df2 %>% count(peou5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_5 ==2) %>% select(porc),
+                ifelse(df2$peou5_5 == 3,  df2 %>% count(peou5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_5 ==3) %>% select(porc),
+                ifelse(df2$peou5_5 == 4,  df2 %>% count(peou5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou5_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou5_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou6_1a <- ifelse(df2$peou6_1 == 1,  df2 %>% count(peou6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_1 ==1) %>% select(porc),
+                ifelse(df2$peou6_1 == 2,  df2 %>% count(peou6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_1 ==2) %>% select(porc),
+                ifelse(df2$peou6_1 == 3,  df2 %>% count(peou6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_1 ==3) %>% select(porc),
+                ifelse(df2$peou6_1 == 4,  df2 %>% count(peou6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou6_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou6_2a <- ifelse(df2$peou6_2 == 1,  df2 %>% count(peou6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_2 ==1) %>% select(porc),
+                ifelse(df2$peou6_2 == 2,  df2 %>% count(peou6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_2 ==2) %>% select(porc),
+                ifelse(df2$peou6_2 == 3,  df2 %>% count(peou6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_2 ==3) %>% select(porc),
+                ifelse(df2$peou6_2 == 4,  df2 %>% count(peou6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou6_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou6_3a <- ifelse(df2$peou6_3 == 1,  df2 %>% count(peou6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_3 ==1) %>% select(porc),
+                ifelse(df2$peou6_3 == 2,  df2 %>% count(peou6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_3 ==2) %>% select(porc),
+                ifelse(df2$peou6_3 == 3,  df2 %>% count(peou6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_3 ==3) %>% select(porc),
+                ifelse(df2$peou6_3 == 4,  df2 %>% count(peou6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou6_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou6_4a <- ifelse(df2$peou6_4 == 1,  df2 %>% count(peou6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_4 ==1) %>% select(porc),
+                ifelse(df2$peou6_4 == 2,  df2 %>% count(peou6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_4 ==2) %>% select(porc),
+                ifelse(df2$peou6_4 == 3,  df2 %>% count(peou6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_4 ==3) %>% select(porc),
+                ifelse(df2$peou6_4 == 4,  df2 %>% count(peou6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou6_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou6_5a <- ifelse(df2$peou6_5 == 1,  df2 %>% count(peou6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_5 ==1) %>% select(porc),
+                ifelse(df2$peou6_5 == 2,  df2 %>% count(peou6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_5 ==2) %>% select(porc),
+                ifelse(df2$peou6_5 == 3,  df2 %>% count(peou6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_5 ==3) %>% select(porc),
+                ifelse(df2$peou6_5 == 4,  df2 %>% count(peou6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou6_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou6_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou7_1a <- ifelse(df2$peou7_1 == 1,  df2 %>% count(peou7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_1 ==1) %>% select(porc),
+                ifelse(df2$peou7_1 == 2,  df2 %>% count(peou7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_1 ==2) %>% select(porc),
+                ifelse(df2$peou7_1 == 3,  df2 %>% count(peou7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_1 ==3) %>% select(porc),
+                ifelse(df2$peou7_1 == 4,  df2 %>% count(peou7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou7_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou7_2a <- ifelse(df2$peou7_2 == 1,  df2 %>% count(peou7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_2 ==1) %>% select(porc),
+                ifelse(df2$peou7_2 == 2,  df2 %>% count(peou7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_2 ==2) %>% select(porc),
+                ifelse(df2$peou7_2 == 3,  df2 %>% count(peou7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_2 ==3) %>% select(porc),
+                ifelse(df2$peou7_2 == 4,  df2 %>% count(peou7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou7_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou7_3a <- ifelse(df2$peou7_3 == 1,  df2 %>% count(peou7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_3 ==1) %>% select(porc),
+                ifelse(df2$peou7_3 == 2,  df2 %>% count(peou7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_3 ==2) %>% select(porc),
+                ifelse(df2$peou7_3 == 3,  df2 %>% count(peou7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_3 ==3) %>% select(porc),
+                ifelse(df2$peou7_3 == 4,  df2 %>% count(peou7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou7_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_3 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou7_4a <- ifelse(df2$peou7_4 == 1,  df2 %>% count(peou7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_4 ==1) %>% select(porc),
+                ifelse(df2$peou7_4 == 2,  df2 %>% count(peou7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_4 ==2) %>% select(porc),
+                ifelse(df2$peou7_4 == 3,  df2 %>% count(peou7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_4 ==3) %>% select(porc),
+                ifelse(df2$peou7_4 == 4,  df2 %>% count(peou7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou7_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou7_5a <- ifelse(df2$peou7_5 == 1,  df2 %>% count(peou7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_5 ==1) %>% select(porc),
+                ifelse(df2$peou7_5 == 2,  df2 %>% count(peou7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_5 ==2) %>% select(porc),
+                ifelse(df2$peou7_5 == 3,  df2 %>% count(peou7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_5 ==3) %>% select(porc),
+                ifelse(df2$peou7_5 == 4,  df2 %>% count(peou7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou7_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou7_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou8_1a <- ifelse(df2$peou8_1 == 1,  df2 %>% count(peou8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_1 ==1) %>% select(porc),
+                ifelse(df2$peou8_1 == 2,  df2 %>% count(peou8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_1 ==2) %>% select(porc),
+                ifelse(df2$peou8_1 == 3,  df2 %>% count(peou8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_1 ==3) %>% select(porc),
+                ifelse(df2$peou8_1 == 4,  df2 %>% count(peou8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou8_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou8_2a <- ifelse(df2$peou8_2 == 1,  df2 %>% count(peou8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_2 ==1) %>% select(porc),
+                ifelse(df2$peou8_2 == 2,  df2 %>% count(peou8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_2 ==2) %>% select(porc),
+                ifelse(df2$peou8_2 == 3,  df2 %>% count(peou8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_2 ==3) %>% select(porc),
+                ifelse(df2$peou8_2 == 4,  df2 %>% count(peou8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou8_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou8_3a <- ifelse(df2$peou8_3 == 1,  df2 %>% count(peou8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_3 ==1) %>% select(porc),
+                ifelse(df2$peou8_3 == 2,  df2 %>% count(peou8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_3 ==2) %>% select(porc),
+                ifelse(df2$peou8_3 == 3,  df2 %>% count(peou8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_3 ==3) %>% select(porc),
+                ifelse(df2$peou8_3 == 4,  df2 %>% count(peou8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou8_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_3 ==5) %>% select(porc)))))  %>% as.numeric()
+df2$peou8_4a <- ifelse(df2$peou8_4 == 1,  df2 %>% count(peou8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_4 ==1) %>% select(porc),
+                ifelse(df2$peou8_4 == 2,  df2 %>% count(peou8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_4 ==2) %>% select(porc),
+                ifelse(df2$peou8_4 == 3,  df2 %>% count(peou8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_4 ==3) %>% select(porc),
+                ifelse(df2$peou8_4 == 4,  df2 %>% count(peou8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou8_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou8_5a <- ifelse(df2$peou8_5 == 1,  df2 %>% count(peou8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_5 ==1) %>% select(porc),
+                ifelse(df2$peou8_5 == 2,  df2 %>% count(peou8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_5 ==2) %>% select(porc),
+                ifelse(df2$peou8_5 == 3,  df2 %>% count(peou8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_5 ==3) %>% select(porc),
+                ifelse(df2$peou8_5 == 4,  df2 %>% count(peou8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou8_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou8_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou9_1a <- ifelse(df2$peou9_1 == 1,  df2 %>% count(peou9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_1 ==1) %>% select(porc),
+                ifelse(df2$peou9_1 == 2,  df2 %>% count(peou9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_1 ==2) %>% select(porc),
+                ifelse(df2$peou9_1 == 3,  df2 %>% count(peou9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_1 ==3) %>% select(porc),
+                ifelse(df2$peou9_1 == 4,  df2 %>% count(peou9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_1 ==4) %>% select(porc),
+                                          df2 %>% count(peou9_1 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_1 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou9_2a <- ifelse(df2$peou9_2 == 1,  df2 %>% count(peou9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_2 ==1) %>% select(porc),
+                ifelse(df2$peou9_2 == 2,  df2 %>% count(peou9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_2 ==2) %>% select(porc),
+                ifelse(df2$peou9_2 == 3,  df2 %>% count(peou9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_2 ==3) %>% select(porc),
+                ifelse(df2$peou9_2 == 4,  df2 %>% count(peou9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_2 ==4) %>% select(porc),
+                                          df2 %>% count(peou9_2 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_2 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou9_3a <- ifelse(df2$peou9_3 == 1,  df2 %>% count(peou9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_3 ==1) %>% select(porc),
+                ifelse(df2$peou9_3 == 2,  df2 %>% count(peou9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_3 ==2) %>% select(porc),
+                ifelse(df2$peou9_3 == 3,  df2 %>% count(peou9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_3 ==3) %>% select(porc),
+                ifelse(df2$peou9_3 == 4,  df2 %>% count(peou9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_3 ==4) %>% select(porc),
+                                          df2 %>% count(peou9_3 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_3 ==5) %>% select(porc)))))  %>% as.numeric()
+df2$peou9_4a <- ifelse(df2$peou9_4 == 1,  df2 %>% count(peou9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_4 ==1) %>% select(porc),
+                ifelse(df2$peou9_4 == 2,  df2 %>% count(peou9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_4 ==2) %>% select(porc),
+                ifelse(df2$peou9_4 == 3,  df2 %>% count(peou9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_4 ==3) %>% select(porc),
+                ifelse(df2$peou9_4 == 4,  df2 %>% count(peou9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_4 ==4) %>% select(porc),
+                                          df2 %>% count(peou9_4 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_4 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou9_5a <- ifelse(df2$peou9_5 == 1,  df2 %>% count(peou9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_5 ==1) %>% select(porc),
+                ifelse(df2$peou9_5 == 2,  df2 %>% count(peou9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_5 ==2) %>% select(porc),
+                ifelse(df2$peou9_5 == 3,  df2 %>% count(peou9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_5 ==3) %>% select(porc),
+                ifelse(df2$peou9_5 == 4,  df2 %>% count(peou9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_5 ==4) %>% select(porc),
+                                          df2 %>% count(peou9_5 ) %>% mutate(porc = n/sum(n)*100) %>% filter(peou9_5 ==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou10_1a<- ifelse(df2$peou10_1 == 1, df2 %>% count(peou10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_1==1) %>% select(porc),
+                ifelse(df2$peou10_1 == 2, df2 %>% count(peou10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_1==2) %>% select(porc),
+                ifelse(df2$peou10_1 == 3, df2 %>% count(peou10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_1==3) %>% select(porc),
+                ifelse(df2$peou10_1 == 4, df2 %>% count(peou10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_1==4) %>% select(porc),
+                                          df2 %>% count(peou10_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_1==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou10_2a<- ifelse(df2$peou10_2 == 1, df2 %>% count(peou10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_2==1) %>% select(porc),
+                ifelse(df2$peou10_2 == 2, df2 %>% count(peou10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_2==2) %>% select(porc),
+                ifelse(df2$peou10_2 == 3, df2 %>% count(peou10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_2==3) %>% select(porc),
+                ifelse(df2$peou10_2 == 4, df2 %>% count(peou10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_2==4) %>% select(porc),
+                                          df2 %>% count(peou10_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_2==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou10_3a<- ifelse(df2$peou10_3 == 1, df2 %>% count(peou10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_3==1) %>% select(porc),
+                ifelse(df2$peou10_3 == 2, df2 %>% count(peou10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_3==2) %>% select(porc),
+                ifelse(df2$peou10_3 == 3, df2 %>% count(peou10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_3==3) %>% select(porc),
+                ifelse(df2$peou10_3 == 4, df2 %>% count(peou10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_3==4) %>% select(porc),
+                                          df2 %>% count(peou10_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_3==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou10_4a<- ifelse(df2$peou10_4 == 1, df2 %>% count(peou10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_4==1) %>% select(porc),
+                ifelse(df2$peou10_4 == 2, df2 %>% count(peou10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_4==2) %>% select(porc),
+                ifelse(df2$peou10_4 == 3, df2 %>% count(peou10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_4==3) %>% select(porc),
+                ifelse(df2$peou10_4 == 4, df2 %>% count(peou10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_4==4) %>% select(porc),
+                                          df2 %>% count(peou10_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_4==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou10_5a<- ifelse(df2$peou10_5 == 1, df2 %>% count(peou10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_5==1) %>% select(porc),
+                ifelse(df2$peou10_5 == 2, df2 %>% count(peou10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_5==2) %>% select(porc),
+                ifelse(df2$peou10_5 == 3, df2 %>% count(peou10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_5==3) %>% select(porc),
+                ifelse(df2$peou10_5 == 4, df2 %>% count(peou10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_5==4) %>% select(porc),
+                                          df2 %>% count(peou10_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou10_5==5) %>% select(porc)))))  %>% as.numeric()
+df2$peou11_1a<- ifelse(df2$peou11_1 == 1, df2 %>% count(peou11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_1==1) %>% select(porc),
+                ifelse(df2$peou11_1 == 2, df2 %>% count(peou11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_1==2) %>% select(porc),
+                ifelse(df2$peou11_1 == 3, df2 %>% count(peou11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_1==3) %>% select(porc),
+                ifelse(df2$peou11_1 == 4, df2 %>% count(peou11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_1==4) %>% select(porc),
+                                          df2 %>% count(peou11_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_1==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou11_2a<- ifelse(df2$peou11_2 == 1, df2 %>% count(peou11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_2==1) %>% select(porc),
+                ifelse(df2$peou11_2 == 2, df2 %>% count(peou11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_2==2) %>% select(porc),
+                ifelse(df2$peou11_2 == 3, df2 %>% count(peou11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_2==3) %>% select(porc),
+                ifelse(df2$peou11_2 == 4, df2 %>% count(peou11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_2==4) %>% select(porc),
+                                          df2 %>% count(peou11_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_2==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou11_3a<- ifelse(df2$peou11_3 == 1, df2 %>% count(peou11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_3==1) %>% select(porc),
+                ifelse(df2$peou11_3 == 2, df2 %>% count(peou11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_3==2) %>% select(porc),
+                ifelse(df2$peou11_3 == 3, df2 %>% count(peou11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_3==3) %>% select(porc),
+                ifelse(df2$peou11_3 == 4, df2 %>% count(peou11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_3==4) %>% select(porc),
+                                          df2 %>% count(peou11_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_3==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou11_4a<- ifelse(df2$peou11_4 == 1, df2 %>% count(peou11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_4==1) %>% select(porc),
+                ifelse(df2$peou11_4 == 2, df2 %>% count(peou11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_4==2) %>% select(porc),
+                ifelse(df2$peou11_4 == 3, df2 %>% count(peou11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_4==3) %>% select(porc),
+                ifelse(df2$peou11_4 == 4, df2 %>% count(peou11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_4==4) %>% select(porc),
+                                          df2 %>% count(peou11_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_4==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou11_5a<- ifelse(df2$peou11_5 == 1, df2 %>% count(peou11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_5==1) %>% select(porc),
+                ifelse(df2$peou11_5 == 2, df2 %>% count(peou11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_5==2) %>% select(porc),
+                ifelse(df2$peou11_5 == 3, df2 %>% count(peou11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_5==3) %>% select(porc),
+                ifelse(df2$peou11_5 == 4, df2 %>% count(peou11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_5==4) %>% select(porc),
+                                          df2 %>% count(peou11_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou11_5==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou12_1a<- ifelse(df2$peou12_1 == 1, df2 %>% count(peou12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_1==1) %>% select(porc),
+                ifelse(df2$peou12_1 == 2, df2 %>% count(peou12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_1==2) %>% select(porc),
+                ifelse(df2$peou12_1 == 3, df2 %>% count(peou12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_1==3) %>% select(porc),
+                ifelse(df2$peou12_1 == 4, df2 %>% count(peou12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_1==4) %>% select(porc),
+                                          df2 %>% count(peou12_1) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_1==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou12_2a<- ifelse(df2$peou12_2 == 1, df2 %>% count(peou12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_2==1) %>% select(porc),
+                ifelse(df2$peou12_2 == 2, df2 %>% count(peou12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_2==2) %>% select(porc),
+                ifelse(df2$peou12_2 == 3, df2 %>% count(peou12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_2==3) %>% select(porc),
+                ifelse(df2$peou12_2 == 4, df2 %>% count(peou12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_2==4) %>% select(porc),
+                                          df2 %>% count(peou12_2) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_2==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou12_3a<- ifelse(df2$peou12_3 == 1, df2 %>% count(peou12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_3==1) %>% select(porc),
+                ifelse(df2$peou12_3 == 2, df2 %>% count(peou12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_3==2) %>% select(porc),
+                ifelse(df2$peou12_3 == 3, df2 %>% count(peou12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_3==3) %>% select(porc),
+                ifelse(df2$peou12_3 == 4, df2 %>% count(peou12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_3==4) %>% select(porc),
+                                          df2 %>% count(peou12_3) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_3==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou12_4a<- ifelse(df2$peou12_4 == 1, df2 %>% count(peou12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_4==1) %>% select(porc),
+                ifelse(df2$peou12_4 == 2, df2 %>% count(peou12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_4==2) %>% select(porc),
+                ifelse(df2$peou12_4 == 3, df2 %>% count(peou12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_4==3) %>% select(porc),
+                ifelse(df2$peou12_4 == 4, df2 %>% count(peou12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_4==4) %>% select(porc),
+                                          df2 %>% count(peou12_4) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_4==5) %>% select(porc)))))   %>% as.numeric()
+df2$peou12_5a<- ifelse(df2$peou12_5 == 1, df2 %>% count(peou12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_5==1) %>% select(porc),
+                ifelse(df2$peou12_5 == 2, df2 %>% count(peou12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_5==2) %>% select(porc),
+                ifelse(df2$peou12_5 == 3, df2 %>% count(peou12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_5==3) %>% select(porc),
+                ifelse(df2$peou12_5 == 4, df2 %>% count(peou12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_5==4) %>% select(porc),
+                                          df2 %>% count(peou12_5) %>% mutate(porc = n/sum(n)*100) %>% filter(peou12_5==5) %>% select(porc))))) %>% as.numeric()
+
+names(df2)
+glimpse(df2)
+```
+
+# Cálculo das pontuações médias nos itens
+```{r}
+names(df2)
+
+df2$pesi1  <- df2 %>% select(148:152) %>% rowMeans()
+df2$pesi2  <- df2 %>% select(153:157) %>% rowMeans()
+df2$pesi3  <- df2 %>% select(158:162) %>% rowMeans()
+df2$pesi4  <- df2 %>% select(163:167) %>% rowMeans()
+df2$pesi5  <- df2 %>% select(168:172) %>% rowMeans()
+df2$pesi6  <- df2 %>% select(173:177) %>% rowMeans()
+df2$pesi7  <- df2 %>% select(178:182) %>% rowMeans()
+df2$pesi8  <- df2 %>% select(183:187) %>% rowMeans()
+df2$pesi9  <- df2 %>% select(188:192) %>% rowMeans()
+df2$pesi10 <- df2 %>% select(193:197) %>% rowMeans()
+df2$pesi11 <- df2 %>% select(198:202) %>% rowMeans()
+df2$pesi12 <- df2 %>% select(203:207) %>% rowMeans()
+
+df2$peou1  <- df2 %>% select(208:212) %>% rowMeans()
+df2$peou2  <- df2 %>% select(213:217) %>% rowMeans()
+df2$peou3  <- df2 %>% select(218:222) %>% rowMeans()
+df2$peou4  <- df2 %>% select(223:227) %>% rowMeans()
+df2$peou5  <- df2 %>% select(228:232) %>% rowMeans()
+df2$peou6  <- df2 %>% select(233:237) %>% rowMeans()
+df2$peou7  <- df2 %>% select(238:242) %>% rowMeans()
+df2$peou8  <- df2 %>% select(243:247) %>% rowMeans()
+df2$peou9  <- df2 %>% select(248:252) %>% rowMeans()
+df2$peou10 <- df2 %>% select(253:257) %>% rowMeans()
+df2$peou11 <- df2 %>% select(258:262) %>% rowMeans()
+df2$peou12 <- df2 %>% select(263:267) %>% rowMeans()
+```
+
+# Análise fatorial - Percepção de Emoções em Si
+```{r}
+
+names(df2) %>% as.data.frame()
+?fa
+# PESI
+# KMO
+df2 %>% select(264:275) %>% KMO()
+
+# Bartlett's test
+df2 %>% select(264:275) %>% bartlett.test()
+
+# Scree-plot
+df2 %>% select(264:275) %>% scree(pc = FALSE)
+#df2 %>% select(264:271,274,275) %>% scree(pc = FALSE)
+
+# Análise paralela
+ana_par_pesi <- 
+df2 %>% select(264:275) %>% fa.parallel(fm="gls",fa="fa",cor = "cor")
+?fa()
+ana_par_pesi$fa.values
+ana_par_pesi$fa.sim
+
+## Foram obtidos 2 fatores com eigenvalues superiores a 1.
+
+# Análise fatorial com dois fatores
+pesi_fa2 <- 
+df2 %>% select(264:275) %>% fa(nfactor = 2,
+                               use = "pairwise",
+                               cor = "cor",
+                               fm = "pa",
+                               rotate = "promax")
+pesi_fa2$loadings
+
+## Análise fatorial com 3 fatores
+
+pesi_fa3 <- 
+df2 %>% select(264:275) %>% fa(nfactor = 3,
+                               use = "pairwise",
+                               cor = "cor",
+                               fm = "pa",
+                               rotate = "promax")
+pesi_fa3$loadings
+
+# PEOU
+
+# KMO
+df2 %>% select(276:287) %>% KMO()
+
+df2 %>% select(276:287) %>% bartlett.test()
+# Scree-plot
+df2 %>% select(276:287) %>% scree(pc = FALSE)
+
+# Análise paralela
+df2 %>% select(276:287) %>% fa.parallel(fm="gls",fa="fa",cor = "cor")
+
+# Análise fatorial
+peou_fa <- 
+df2 %>% select(276:287) %>% fa(nfactor = 1,
+                               cor = "cor",
+                               fm = "pa",
+                               rotate = "promax")
+peou_fa$loadings
+```
+
+# Coeficientes de fidedignidade
+
+```{r}
+names(df2) %>% as.data.frame()
+
+# PESI (2 fatores)
+
+alpha_pesi1_2 <- df2 %>% select(264:269,274,275) %>% alpha()
+alpha_pesi2_2 <- df2 %>% select(270:273) %>% alpha()
+
+omega_pesi1_2 <- df2 %>% select(264:269,274,275) %>% omega()
+omega_pesi2_2 <- df2 %>% select(270:273) %>% omega()
+
+#PESI (3 fatores)
+
+alpha_pesi1_3 <- df2 %>% select(264:269) %>% alpha()
+alpha_pesi2_3 <- df2 %>% select(270:273) %>% alpha()
+alpha_pesi3_3 <- df2 %>% select(274:275) %>% alpha()
+
+omega_pesi1_3 <- df2 %>% select(264:269) %>% omega()
+omega_pesi2_3 <- df2 %>% select(270:273) %>% omega()
+omega_pesi3_3 <- df2 %>% select(274,275) %>% omega(nfactors = 1)
+
+# PEOU
+
+alpha_peou1_1 <- df2 %>% select(276:287) %>% alpha()
+
+omega_peou1_1 <- df2 %>% select(276:287) %>% omega()
+
+data.frame(Fatores = c("PESI_1_2",
+                       "PESI_2_2",
+                       "PESI_1_3",
+                       "PESI_2_3",
+                       "PESI_3_3",
+                       "PEOU_1_1"),
+           "Alfa de Cronbach" = c( round(omega_pesi1_2$alpha, digits = 2),
+                                   round(omega_pesi2_2$alpha, digits = 2),
+                                   round(omega_pesi1_3$alpha, digits = 2),
+                                   round(omega_pesi2_3$alpha, digits = 2),
+                                   round(omega_pesi3_3$alpha, digits = 2),
+                                   round(omega_peou1_1$alpha, digits = 2)),
+           "Omega de McDonald" = c(round(omega_pesi1_2$omega.tot, digits = 2),
+                                   round(omega_pesi2_2$omega.tot, digits = 2),
+                                   round(omega_pesi1_3$omega.tot, digits = 2),
+                                   round(omega_pesi2_3$omega.tot, digits = 2),
+                                   round(omega_pesi3_3$omega.tot, digits = 2),
+                                   round(omega_peou1_1$omega.tot, digits = 2)))
+
+```
+
+# Cálculo das pontuações nos fatores
+```{r}
+df2$PESI_1_2 <- df2 %>% select(264:269,274,275) %>% rowMeans()
+df2$PESI_2_2 <- df2 %>% select(270:273) %>% rowMeans()
+df2$PESI_1_3 <- df2 %>% select(264:269)  %>% rowMeans()
+df2$PESI_2_3 <- df2 %>% select(270:273)  %>% rowMeans()
+df2$PESI_3_3 <- df2 %>% select(274,275)  %>% rowMeans()
+df2$PEOU_1_1 <- df2 %>% select(276:287) %>% rowMeans()
+```
+
+
+
+# Correlação entre os fatores
+```{r}
+names(df2) %>% as.data.frame()
+corr_pe <- corr.test(df2[,308:313])
+
+corr_pe$stars %>% kable()
+round(corr_pe$r, digits = 3) %>% kable()
+round(corr_pe$p, digits = 3) %>% kable()
+```
+
+
+# Estatísticas descritivas
+
+```{r}
+library(janitor)
+df2 %>% names() %>% as.data.frame() 
+df2 %>% names()
+df2 %>% glimpse()
+view(df2)
+
+# dos fatores
+
+df2 %>% select(308:313) %>% summary() %>% kable()
+df2 %>% select(308:313) %>% describe() %>% round(digits = 1) %>% kable()
+
+# Idade
+
+describe(df2$Idade) %>% kable()
+
+# Sexo
+df2 %>% tabyl(Sexo) %>% pander()
+
+# Escolaridade
+df2 %>% tabyl(Esc_cod) %>% pander()
+df2 %>% tabyl(Escolaridade) %>% pander()
+df2 %>% tabyl(Escolarid) %>% pander()
+df2 %>% tabyl(Esc) %>% pander()
+
+## Criar uma coluna com todos os dados de escolaridade
+## juntar colunas Esc_cod com Esc
+
+## Codificar coluna Esc em 1 (fundamental), 2 (médio) e 3 (superior). Colar o resultado na variável nova Esc1
+
+df2$Esc1 <- ifelse(df2$Esc == 1 | df2$Esc == 2, 1,
+                                  ifelse(df2$Esc == 3 | df2$Esc == 4, 2, 
+                                         ifelse(df2$Esc == 5 | df2$Esc == 6, 3, NA)))
+
+## juntar as variáveis Esc1 e esc_cod em uma só (Esc_total)
+df2$Esc_total <- df2 %>% select(Esc_cod,Esc1) %>% rowSums(na.rm = TRUE)
+
+
+## Estatística descritiva de escolaridade (Esc_total)
+names(df2)
+df2 %>% tabyl(Esc_total) %>% pander()
+
+# Estatística descritiva para estado civil
+
+glimpse(df2)
+df2 %>% tabyl(EstCiv_cod) %>% pander()
+df2 %>% tabyl(EstadoCivil) %>% pander()
+df2 %>% tabyl(Estaciv) %>% pander()
+
+df2$es1_95 <- 
+  ifelse(df2$EstadoCivil == "",NA,
+         ifelse(df2$EstadoCivil == "Casado(a)",2,
+                ifelse(df2$EstadoCivil == "Divorciado(a)",3,
+                       ifelse(df2$EstadoCivil == "Relacionamento Estável",5,
+                              ifelse(df2$EstadoCivil == "Solteiro(a)",1,4)))))
+install.packages("labelled")
+df2$es2_272 <- labelled::remove_val_labels(df2$Estaciv)
+
+count(df2,df2$EstCiv_total)
+df2$EstCiv_total <- df2 %>% select(es1_95,es2_272) %>% rowSums(na.rm = TRUE)
+
+levels(df2$EstCiv_total) <- c("Solteiro(a)","Casado(a)","Divorciado(a)","Viúvo(a)","Relacionamento Estável","Outros")
+
+df2 %>% tabyl(EstCiv_total) %>% kable()
+
+```
+
+
+
+```{r}
+# PESI
+
+df2 %>% count(pesi1_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi1_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi1_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi1_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi1_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi2_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi2_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi2_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi2_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi2_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi3_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi3_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi3_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi3_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi3_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi4_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi4_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi4_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi4_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi4_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi5_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi5_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi5_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi5_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi5_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi6_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi6_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi6_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi6_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi6_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi7_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi7_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi7_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi7_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi7_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi8_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi8_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi8_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi8_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi8_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi9_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi9_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi9_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi9_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi9_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi10_1) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi10_2) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi10_3) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi10_4) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi10_5) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi11_1) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi11_2) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi11_3) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi11_4) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi11_5) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi12_1) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi12_2) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi12_3) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi12_4) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(pesi12_5) %>% mutate(porc = n/sum(n)*100)
+
+# PEOU
+df2 %>% count(peou1_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou1_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou1_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou1_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou1_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou2_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou2_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou2_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou2_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou2_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou3_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou3_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou3_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou3_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou3_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou4_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou4_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou4_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou4_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou4_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou5_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou5_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou5_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou5_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou5_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou6_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou6_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou6_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou6_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou6_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou7_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou7_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou7_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou7_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou7_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou8_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou8_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou8_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou8_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou8_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou9_1 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou9_2 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou9_3 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou9_4 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou9_5 ) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou10_1) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou10_2) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou10_3) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou10_4) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou10_5) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou11_1) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou11_2) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou11_3) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou11_4) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou11_5) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou12_1) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou12_2) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou12_3) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou12_4) %>% mutate(porc = n/sum(n)*100)
+df2 %>% count(peou12_5) %>% mutate(porc = n/sum(n)*100)
+```
+
+# Pontuação por especialistas
+```{r}
+df2$pesi01_01d <- ifelse(df2$pesi1_1==5 | df2$pesi1_1==4,1,0)
+df2$pesi01_02d <- ifelse(df2$pesi1_2==3 | df2$pesi1_2==3,1,0)
+df2$pesi01_03d <- ifelse(df2$pesi1_3==1 | df2$pesi1_3==2,1,0)
+df2$pesi01_04d <- ifelse(df2$pesi1_4==1 | df2$pesi1_4==2,1,0)
+df2$pesi01_05d <- ifelse(df2$pesi1_5==1 | df2$pesi1_5==2,1,0)
+
+df2$pesi02_01d <- ifelse(df2$pesi2_1==1 | df2$pesi2_1==2,1,0)
+df2$pesi02_02d <- ifelse(df2$pesi2_2==1 | df2$pesi2_2==2,1,0)
+df2$pesi02_03d <- ifelse(df2$pesi2_3==3 | df2$pesi2_3==3,1,0)
+df2$pesi02_04d <- ifelse(df2$pesi2_4==1 | df2$pesi2_4==2,1,0)
+df2$pesi02_05d <- ifelse(df2$pesi2_5==1 | df2$pesi2_5==2,1,0)
+
+df2$pesi03_01d <- ifelse(df2$pesi3_1==1 | df2$pesi3_1==2,1,0)
+df2$pesi03_02d <- ifelse(df2$pesi3_2==1 | df2$pesi3_2==2,1,0)
+df2$pesi03_03d <- ifelse(df2$pesi3_3==1 | df2$pesi3_3==2,1,0)
+df2$pesi03_04d <- ifelse(df2$pesi3_4==1 | df2$pesi3_4==2,1,0)
+df2$pesi03_05d <- ifelse(df2$pesi3_5==4 | df2$pesi3_5==5,1,0)
+
+df2$pesi04_01d <- ifelse(df2$pesi4_1==5 | df2$pesi4_1==4,1,0)
+df2$pesi04_02d <- ifelse(df2$pesi4_2==3 | df2$pesi4_2==3,1,0)
+df2$pesi04_03d <- ifelse(df2$pesi4_3==1 | df2$pesi4_3==2,1,0)
+df2$pesi04_04d <- ifelse(df2$pesi4_4==1 | df2$pesi4_4==2,1,0)
+df2$pesi04_05d <- ifelse(df2$pesi4_5==1 | df2$pesi4_5==2,1,0)
+
+df2$pesi05_01d <- ifelse(df2$pesi5_1==5 | df2$pesi5_1==4,1,0)
+df2$pesi05_02d <- ifelse(df2$pesi5_2==3 | df2$pesi5_2==3,1,0)
+df2$pesi05_03d <- ifelse(df2$pesi5_3==1 | df2$pesi5_3==2,1,0)
+df2$pesi05_04d <- ifelse(df2$pesi5_4==1 | df2$pesi5_4==2,1,0)
+df2$pesi05_05d <- ifelse(df2$pesi5_5==1 | df2$pesi5_5==2,1,0)
+
+df2$pesi06_01d <- ifelse(df2$pesi6_1==5 | df2$pesi6_1==4,1,0)
+df2$pesi06_02d <- ifelse(df2$pesi6_2==3 | df2$pesi6_2==3,1,0)
+df2$pesi06_03d <- ifelse(df2$pesi6_3==1 | df2$pesi6_3==2,1,0)
+df2$pesi06_04d <- ifelse(df2$pesi6_4==1 | df2$pesi6_4==2,1,0)
+df2$pesi06_05d <- ifelse(df2$pesi6_5==1 | df2$pesi6_5==2,1,0)
+
+df2$pesi07_01d <- ifelse(df2$pesi7_1==5 | df2$pesi7_1==4,1,0)
+df2$pesi07_02d <- ifelse(df2$pesi7_2==3 | df2$pesi7_2==3,1,0)
+df2$pesi07_03d <- ifelse(df2$pesi7_3==1 | df2$pesi7_3==2,1,0)
+df2$pesi07_04d <- ifelse(df2$pesi7_4==1 | df2$pesi7_4==2,1,0)
+df2$pesi07_05d <- ifelse(df2$pesi7_5==1 | df2$pesi7_5==2,1,0)
+
+df2$pesi08_01d <- ifelse(df2$pesi8_1==5 | df2$pesi8_1==4,1,0)
+df2$pesi08_02d <- ifelse(df2$pesi8_2==3 | df2$pesi8_2==3,1,0)
+df2$pesi08_03d <- ifelse(df2$pesi8_3==1 | df2$pesi8_3==2,1,0)
+df2$pesi08_04d <- ifelse(df2$pesi8_4==1 | df2$pesi8_4==2,1,0)
+df2$pesi08_05d <- ifelse(df2$pesi8_5==1 | df2$pesi8_5==2,1,0)
+
+df2$pesi09_01d <- ifelse(df2$pesi9_1==5 | df2$pesi9_1==4,1,0)
+df2$pesi09_02d <- ifelse(df2$pesi9_2==3 | df2$pesi9_2==3,1,0)
+df2$pesi09_03d <- ifelse(df2$pesi9_3==1 | df2$pesi9_3==2,1,0)
+df2$pesi09_04d <- ifelse(df2$pesi9_4==1 | df2$pesi9_4==2,1,0)
+df2$pesi09_05d <- ifelse(df2$pesi9_5==1 | df2$pesi9_5==2,1,0)
+
+df2$pesi10_01d <- ifelse(df2$pesi10_1==5 | df2$pesi10_1==4,1,0)
+df2$pesi10_02d <- ifelse(df2$pesi10_2==3 | df2$pesi10_2==3,1,0)
+df2$pesi10_03d <- ifelse(df2$pesi10_3==1 | df2$pesi10_3==2,1,0)
+df2$pesi10_04d <- ifelse(df2$pesi10_4==1 | df2$pesi10_4==2,1,0)
+df2$pesi10_05d <- ifelse(df2$pesi10_5==1 | df2$pesi10_5==2,1,0)
+
+df2$pesi11_01d <- ifelse(df2$pesi11_1==5 | df2$pesi11_1==4,1,0)
+df2$pesi11_02d <- ifelse(df2$pesi11_2==3 | df2$pesi11_2==3,1,0)
+df2$pesi11_03d <- ifelse(df2$pesi11_3==1 | df2$pesi11_3==2,1,0)
+df2$pesi11_04d <- ifelse(df2$pesi11_4==1 | df2$pesi11_4==2,1,0)
+df2$pesi11_05d <- ifelse(df2$pesi11_5==1 | df2$pesi11_5==2,1,0)
+
+df2$pesi12_01d <- ifelse(df2$pesi12_1==5 | df2$pesi12_1==4,1,0)
+df2$pesi12_02d <- ifelse(df2$pesi12_2==3 | df2$pesi12_2==3,1,0)
+df2$pesi12_03d <- ifelse(df2$pesi12_3==1 | df2$pesi12_3==2,1,0)
+df2$pesi12_04d <- ifelse(df2$pesi12_4==1 | df2$pesi12_4==2,1,0)
+df2$pesi12_05d <- ifelse(df2$pesi12_5==1 | df2$pesi12_5==2,1,0)
+```
+
