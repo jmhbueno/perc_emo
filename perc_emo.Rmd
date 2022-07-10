@@ -705,7 +705,6 @@ df2$peou12 <- df2 %>% select(263:267) %>% rowMeans()
 
 # Análise fatorial - Percepção de Emoções em Si
 ```{r}
-
 names(df2) %>% as.data.frame()
 ?fa
 # PESI
@@ -746,7 +745,11 @@ df2 %>% select(264:275) %>% fa(nfactor = 3,
                                fm = "pa",
                                rotate = "promax")
 pesi_fa3$loadings
+```
 
+# Análise fatorial - Percepção de Emoções em Outras Pessoas
+
+```{r}
 # PEOU
 
 # KMO
@@ -767,6 +770,33 @@ df2 %>% select(276:287) %>% fa(nfactor = 1,
                                rotate = "promax")
 peou_fa$loadings
 ```
+
+# Análise Fatorial de Segunda Ordem
+
+```{r}
+# Análise fatorial
+names(df2)
+
+df2 %>% select(310:313) %>% scree()
+df2 %>% select(310:313) %>% KMO()
+df2 %>% select(310:313) %>% bartlett.test()
+
+PE_SO1 <- 
+df2 %>% select(310:313) %>% fa(nfactor = 1,
+                               cor = "cor",
+                               fm = "pa",
+                               rotate = "promax")
+
+PE_SO2 <- 
+df2 %>% select(310:313) %>% fa(nfactor = 2,
+                               cor = "cor",
+                               fm = "pa",
+                               rotate = "promax")
+
+PE_SO1
+PE_SO2
+```
+
 
 # Coeficientes de fidedignidade
 
